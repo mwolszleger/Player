@@ -10,8 +10,14 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.example.micha.player.MainActivity">
 
-    <TextView
+
+    <fragment
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Helloh World!" />
+        android:name="com.example.micha.player.Player"
+        android:id="@+id/fragment"
+        tools:layout="@layout/fragment_player"
+        android:layout_marginBottom="16dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true" />
 </RelativeLayout>
