@@ -33,12 +33,13 @@ public class Player extends Fragment {
     private OnFragmentInteractionListener mListener;
 
 
-    private MediaPlayer mp;
+   // private MediaPlayer mp;
     private int soundId;
     private Button button;
     private SeekBar seek;
     private Handler mHandler = new Handler();
-
+    private Button buttonNext;
+    private Button buttonPrevious;
 
     public Player() {
         // Required empty public constructor
@@ -86,28 +87,45 @@ public class Player extends Fragment {
 
 
         button = (Button) rootView.findViewById(R.id.button3);
+        buttonNext = (Button) rootView.findViewById(R.id.button4);
+        buttonPrevious = (Button) rootView.findViewById(R.id.button2);
         seek=(SeekBar)rootView.findViewById(R.id.seekBar);
-        if(mp != null) {
+//        if(mp != null) {
+//
+//            mp.release();
+//
+//        }
 
-            mp.release();
-
-        }
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                if(mp.isPlaying())
-                    mp.pause();
+              MediaPlayer mpp= MainActivity.mp;
+                if(mpp==null)
+                    return;
+                if(mpp.isPlaying())
+                    mpp.pause();
                 else
-                    mp.start();
-
+                    mpp.start();
+                //MainActivity.mp.start();
             }
         });
-
+        buttonNext.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MainActivity.nextSong(getActivity());
+            }
+        });
+        buttonPrevious.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MainActivity.previousSong(getActivity());
+            }
+        });
         seek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 
+                MediaPlayer mp= MainActivity.mp;
                 if(fromUser) {
                     seekBar.setMax(mp.getDuration() / 1000);
                     //textView.setText(progress + "/" + seekBar.getMax());
@@ -130,7 +148,7 @@ public class Player extends Fragment {
             @Override
             public void run() {
 
-
+                MediaPlayer mp= MainActivity.mp;
 
                 if(mp != null){
                     int mCurrentPosition = mp.getCurrentPosition() / 1000;
@@ -141,7 +159,7 @@ public class Player extends Fragment {
         });
 
 //        soundId=R.raw.aaa;
-//        mp = MediaPlayer.create(getActivity(), soundId);
+
 
         // mp.start();
 
