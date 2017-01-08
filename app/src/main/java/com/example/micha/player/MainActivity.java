@@ -6,6 +6,8 @@ import android.content.ContentUris;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.media.MediaPlayer;
+import android.net.wifi.p2p.WifiP2pManager;
+import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -19,28 +21,112 @@ import android.content.ContentResolver;
 import android.database.Cursor;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ListView;
 import android.support.v4.content.ContextCompat;
+import android.widget.SeekBar;
+import android.widget.TextView;
+
 public class MainActivity extends AppCompatActivity  {
 
 
     public static ArrayList<Song> songList;
     private static ListView songView;
-private static int SongId;
-    public static SongAdapter songAdt;
-    public static MediaPlayer mp;
+    private Player player=new Player(this);
+
+    private int SongId;
+    private SongAdapter songAdt;
 
 
+
+    private Button button;
+    private SeekBar seek;
+    private Handler mHandler = new Handler();
+    private Button buttonNext;
+    private Button buttonPrevious;
+    private TextView text;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);//test21
+        setContentView(R.layout.activity_main);
 
-        //mp=new MediaPlayer();
+        button = (Button) findViewById(R.id.button3);
+        buttonNext = (Button) findViewById(R.id.button4);
+        buttonPrevious = (Button) findViewById(R.id.button2);
+        seek=(SeekBar)findViewById(R.id.seekBar);
+        text=(TextView) findViewById(R.id.textView);
+
         songView = (ListView) findViewById(R.id.song_list);
         songList = new ArrayList<Song>();
 
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
 
+                if(player.isNull())
+                    return;
+                if(player.isPlaying())
+                {
+                    player.pause();
+                    button.setText("PLAY");
+                }
+                else {
+                    player.start();
+                    button.setText("PAUSE");
+                }
+            }
+        });
+
+        buttonNext.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                nextSong();
+            }
+        });
+        buttonPrevious.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                previousSong();
+            }
+        });
+        seek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+
+
+                if(fromUser) {
+                    seekBar.setMax(player.getDuration() / 1000);
+
+                    player.seekTo(progress * 1000);
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+        runOnUiThread(new Runnable() {
+
+            @Override
+            public void run() {
+
+
+
+                if(!player.isNull()){
+                    int mCurrentPosition = player.getCurrentPosition() / 1000;
+                    seek.setProgress(mCurrentPosition);
+                }
+                mHandler.postDelayed(this, 1000);
+                if(player.isFinished())
+                    nextSong();
+            }
+        });
         getSongList();
 
         Collections.sort(songList, new Comparator<Song>() {
@@ -54,7 +140,21 @@ private static int SongId;
 
 
     }
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
 
+
+        text.setText(savedInstanceState.getString("name"));
+
+    }
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString("name",text.getText().toString());
+
+
+    }
     public void getSongList() {
         //retrieve song info
 
@@ -109,60 +209,43 @@ private static int SongId;
 
         }
 
-
-        //mp=MediaPlayer.create(this,trackUri);
-//        try {
-//            mp.setDataSource(getApplicationContext(),trackUri);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-
     }
-    public static void newSong(int id,Activity a)
+    public void newSong(int id)
     {
         Uri trackUri = ContentUris.withAppendedId(
                 android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 songList.get(id).getID());
-        if(mp != null) {
-
-            mp.stop();
-            mp.release();
-
-        }
-        mp=MediaPlayer.create(a,trackUri);
-
+        player.newSong(trackUri);
+        text.setText(songList.get(id).getTitle());
+        button.setText("PAUSE");
     }
-    static void nextSong(Activity a)
+    void nextSong()
     {
-
-
         if(songList.size()!=SongId+1)
         {
             SongId++;
-
-
         }
         else SongId=0;
-        newSong(SongId,a);
+        newSong(SongId);
+
 
     }
-    static void previousSong(Activity a)
+    void previousSong()
     {
 
         if(SongId!=0)
         {
             SongId--;
-
-
         }
         else SongId=songList.size()-1;
-        newSong(SongId,a);
+        newSong(SongId);
 
     }
     public void songPicked(View view){
 
         int id = Integer.parseInt(view.getTag().toString());
-        newSong(id,this);
+        newSong(id);
+
         SongId=id;
     }
 

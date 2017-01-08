@@ -14,18 +14,52 @@
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        >
+        <TextView
+            android:text=" "
+            android:layout_width="match_parent"
+            android:layout_height="25dp"
+            android:textSize="20dp"
+            android:id="@+id/textView" />
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
 
-        <fragment
 
-            android:layout_width="wrap_content"
+            <Button
+                android:text="Previous"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/button2" />
 
-            android:name="com.example.micha.player.Player"
-            android:id="@+id/fragment"
-            tools:layout="@layout/fragment_player"
+            <Button
+                android:text="Play"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/button3" />
+
+            <Button
+                android:text="Next"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/button4" />
+
+        </LinearLayout>
+
+        <SeekBar
+
             android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true" />
+            android:id="@+id/seekBar"
+            android:layout_width="match_parent"
+            android:layout_marginTop="10dp"
+            />
+
+
 
         <ListView
             android:id="@+id/song_list"
@@ -33,7 +67,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:choiceMode="singleChoice"
-            android:listSelector="@android:color/holo_red_light"
+
             android:layout_alignParentTop="true"
             android:layout_alignParentStart="true">
         </ListView>
