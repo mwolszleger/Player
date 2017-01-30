@@ -3,6 +3,7 @@ package com.example.micha.player;
 import android.Manifest;
 import android.app.Activity;
 import android.content.ContentUris;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.media.MediaPlayer;
@@ -35,10 +36,10 @@ public class MainActivity extends AppCompatActivity  {
     private Player player=new Player(this);
 
     private int SongId;
-    private SongAdapter songAdt;
+    private static SongAdapter songAdt;
 
 
-
+    private static boolean firstTime=true;
     private Button button;
     private SeekBar seek;
     private Handler mHandler = new Handler();
@@ -46,10 +47,18 @@ public class MainActivity extends AppCompatActivity  {
     private Button buttonPrevious;
     private TextView text;
     @Override
+    protected void onStart() {
+        super.onStart();
+        Log.e("test","resume");
+        songAdt = new SongAdapter(this, songList);
+        songView.setAdapter(songAdt);
+        songView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+    }
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        Log.e("test","cre");
         button = (Button) findViewById(R.id.button3);
         buttonNext = (Button) findViewById(R.id.button4);
         buttonPrevious = (Button) findViewById(R.id.button2);
@@ -57,7 +66,7 @@ public class MainActivity extends AppCompatActivity  {
         text=(TextView) findViewById(R.id.textView);
 
         songView = (ListView) findViewById(R.id.song_list);
-        songList = new ArrayList<Song>();
+
 
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -127,18 +136,27 @@ public class MainActivity extends AppCompatActivity  {
                     nextSong();
             }
         });
-        getSongList();
+        if(firstTime) {
+            songList = new ArrayList<Song>();
+            getSongList(songList);
+            if(PlayLists.allSongsList.size()==0)
+                getSongList(PlayLists.allSongsList);
+            firstTime=false;
+
+
 
         Collections.sort(songList, new Comparator<Song>() {
             public int compare(Song a, Song b) {
                 return a.getTitle().compareTo(b.getTitle());
             }
         });
+            PlayLists.allSongsList=new ArrayList<Song>(songList);
+        }
         songAdt = new SongAdapter(this, songList);
         songView.setAdapter(songAdt);
         songView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 
-
+    Log.e("trzy",Integer.toString(songList.size()));
     }
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
@@ -146,16 +164,17 @@ public class MainActivity extends AppCompatActivity  {
 
 
         text.setText(savedInstanceState.getString("name"));
+        button.setText(savedInstanceState.getString("button"));
 
     }
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString("name",text.getText().toString());
-
+        outState.putString("button",button.getText().toString());
 
     }
-    public void getSongList() {
+    public void getSongList(ArrayList<Song> songsList) {
         //retrieve song info
 
         ContentResolver musicResolver = getContentResolver();
@@ -203,7 +222,7 @@ public class MainActivity extends AppCompatActivity  {
 
                 String thisTitle = musicCursor.getString(titleColumn);
                 String thisArtist = musicCursor.getString(artistColumn);
-                songList.add(new Song(thisId, thisTitle, thisArtist));
+                songsList.add(new Song(thisId, thisTitle, thisArtist));
             }
             while (musicCursor.moveToNext());
 
@@ -218,6 +237,16 @@ public class MainActivity extends AppCompatActivity  {
         player.newSong(trackUri);
         text.setText(songList.get(id).getTitle());
         button.setText("PAUSE");
+    }
+    public void playLists(View view)
+    {
+        if(!player.isNull()&&player.isPlaying())
+            player.pause();
+        button.setText("PLAY");
+        text.setText("");
+        Intent intent = new Intent(this, ListsHandling.class);
+        startActivity(intent);
+
     }
     void nextSong()
     {

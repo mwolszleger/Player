@@ -18,6 +18,14 @@
         android:layout_alignParentTop="true"
         android:layout_alignParentStart="true"
         >
+
+        <Button
+            android:text="Playlists"
+            android:onClick="playLists"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/button" />
+
         <TextView
             android:text=" "
             android:layout_width="match_parent"
